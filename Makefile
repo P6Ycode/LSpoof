@@ -1,16 +1,18 @@
-ARCHS = arm64
+ARCHS = arm64 arm64e
 TARGET = iphone:clang:latest:16.0
+THEOS_PACKAGE_SCHEME = rootless
 
 include $(THEOS)/makefiles/common.mk
 
-LIBRARY_NAME = LocationSpoofer
+TWEAK_NAME = LSpoof
 
-LocationSpoofer_FILES = \
-	Source/dylib_init.m \
+LSpoof_FILES = \
+	Source/TweakInit.m \
 	Source/LSHooking.m \
 	Source/LocationSpoofer.m \
 	Source/LSLocationState.m \
 	Source/LSLocationBridge.m \
+	Source/LSSystemWideBridge.m \
 	Source/LSSpoofProvider.m \
 	Source/LSLocationHookAdapter.m \
 	Source/RouteSimulator.m \
@@ -22,8 +24,12 @@ LocationSpoofer_FILES = \
 	Source/MapPickerViewController+Bookmarks.m \
 	Source/PersistenceManager.m
 
-LocationSpoofer_CFLAGS = -fobjc-arc -Wall -Wextra -ISource
-LocationSpoofer_FRAMEWORKS = Foundation UIKit CoreLocation MapKit
-LocationSpoofer_LDFLAGS = -install_name @executable_path/Frameworks/LocationSpoofer.dylib
+LSpoof_CFLAGS = -fobjc-arc -Wall -Wextra -ISource
+LSpoof_FRAMEWORKS = Foundation UIKit CoreLocation MapKit
 
-include $(THEOS)/makefiles/library.mk
+INSTALL_TARGET_PROCESSES = SpringBoard
+
+include $(THEOS_MAKE_PATH)/tweak.mk
+
+after-install::
+	install.exec "sbreload"
