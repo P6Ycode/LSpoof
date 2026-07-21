@@ -6,9 +6,9 @@
 #import <signal.h>
 #import <unistd.h>
 
-static const char *kLSLiveRouteCoordinateNotification = "com.locationspoofer.dylib/live-route-coordinate";
-static const char *kLSLiveRouteMotionNotification = "com.locationspoofer.dylib/live-route-motion";
-static const char *kLSLiveRouteStatusNotification = "com.locationspoofer.dylib/live-route-status";
+static const char *kLSLiveRouteCoordinateNotification = "com.p6ycode.lspoof/live-route-coordinate";
+static const char *kLSLiveRouteMotionNotification = "com.p6ycode.lspoof/live-route-motion";
+static const char *kLSLiveRouteStatusNotification = "com.p6ycode.lspoof/live-route-status";
 
 static int ls_coordinateToken = NOTIFY_TOKEN_INVALID;
 static int ls_motionToken = NOTIFY_TOKEN_INVALID;
