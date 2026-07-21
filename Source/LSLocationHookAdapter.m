@@ -1,16 +1,16 @@
 #import "LSLocationHookAdapter.h"
 #import "LSSpoofProvider.h"
 #import "PersistenceManager.h"
+#import "RouteSimulator.h"
 
 @implementation LSLocationHookAdapter
-
 + (BOOL)shouldProvideSpoofedLocation {
-    return [[PersistenceManager shared] isSpoofingEnabled] ||
-           [[PersistenceManager shared] keepLastSpoof];
+    PersistenceManager *store = [PersistenceManager shared];
+    BOOL requested = [store isSpoofingEnabled] || store.keepLastSpoof;
+    BOOL hasSource = [LSRouteSimulator shared].isSimulating || [store hasStoredCoordinate];
+    return requested && hasSource;
 }
-
-+ (CLLocation *)currentSpoofedLocation {
++ (nullable CLLocation *)currentSpoofedLocation {
     return [[LSSpoofProvider shared] currentLocation];
 }
-
 @end
