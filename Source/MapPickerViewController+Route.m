@@ -31,7 +31,7 @@
 
     self.customSpeedField = [[UITextField alloc] init];
     self.customSpeedField.translatesAutoresizingMaskIntoConstraints = NO;
-    self.customSpeedField.placeholder = @"Custom km/h";
+    self.customSpeedField.placeholder = @"Custom mph";
     self.customSpeedField.keyboardType = UIKeyboardTypeDecimalPad;
     self.customSpeedField.borderStyle = UITextBorderStyleRoundedRect;
     self.customSpeedField.text = @"30";
@@ -290,7 +290,7 @@
         simulator.transportMode = [self ls_selectedTransportMode];
         if (simulator.transportMode == LSTransportModeCustom) {
             NSNumber *parsed = [self ls_parsedCoordinateComponentFromText:self.customSpeedField.text];
-            simulator.customSpeedKmh = parsed ? parsed.doubleValue : 30.0;
+            simulator.customSpeedMph = parsed ? parsed.doubleValue : 30.0;
         }
     }
 }
@@ -310,7 +310,7 @@
     simulator.transportMode = [self ls_selectedTransportMode];
     if (simulator.transportMode == LSTransportModeCustom) {
         NSNumber *parsed = [self ls_parsedCoordinateComponentFromText:self.customSpeedField.text];
-        simulator.customSpeedKmh = MAX(parsed ? parsed.doubleValue : 30.0, 1.0);
+        simulator.customSpeedMph = MAX(parsed ? parsed.doubleValue : 30.0, 1.0);
     }
 
     CLLocationCoordinate2D start = self.startAnnotation.coordinate;
@@ -457,8 +457,8 @@
 
 - (void)routeSimulator:(LSRouteSimulator *)simulator didUpdateCoordinate:(CLLocationCoordinate2D)coordinate heading:(CLLocationDirection)heading {
     (void)heading;
-    double kmh = [LSRouteSimulator speedMetersPerSecondForMode:simulator.transportMode customSpeedKmh:simulator.customSpeedKmh] * 3.6;
-    self.statusLabel.text = [NSString stringWithFormat:@"Simulating · %.1f km/h", kmh];
+    double mph = [LSRouteSimulator speedMetersPerSecondForMode:simulator.transportMode customSpeedMph:simulator.customSpeedMph] * 2.236936;
+    self.statusLabel.text = [NSString stringWithFormat:@"Simulating · %.1f mph", kmh];
     self.statusDot.backgroundColor = UIColor.systemGreenColor;
 
     self.selectedCoordinate = coordinate;

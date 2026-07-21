@@ -37,7 +37,7 @@
     if (self) {
         _coordLock = OS_UNFAIR_LOCK_INIT;
         _transportMode = LSTransportModeWalking;
-        _customSpeedKmh = 30.0;
+        _customSpeedMph = 30.0;
         _currentCoordinate = kCLLocationCoordinate2DInvalid;
         _currentHeading = 0.0;
     }
@@ -70,6 +70,10 @@
     os_unfair_lock_unlock(&_coordLock);
 }
 
+- (double)currentSpeedMetersPerSecond {
+    return [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode customSpeedMph:self.customSpeedMph];
+}
+
 - (CLLocationCoordinate2D)startCoordinate {
     return self.routePoints.firstObject.coordinate;
 }
@@ -78,7 +82,7 @@
     return self.routePoints.lastObject.coordinate;
 }
 
-+ (double)speedMetersPerSecondForMode:(LSTransportMode)mode customSpeedKmh:(double)customSpeedKmh {
++ (double)speedMetersPerSecondForMode:(LSTransportMode)mode customSpeedMph:(double)customSpeedMph {
     switch (mode) {
         case LSTransportModeWalking:
             return 1.389;
@@ -87,7 +91,7 @@
         case LSTransportModeDriving:
             return 13.889;
         case LSTransportModeCustom:
-            return customSpeedKmh / 3.6;
+            return customSpeedMph * 0.44704;
     }
     return 1.389;
 }
@@ -210,7 +214,7 @@
     }
 
     double speed = [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode
-                                                  customSpeedKmh:self.customSpeedKmh];
+                                                  customSpeedMph:self.customSpeedMph];
     self.distanceCovered += speed * 0.1;
 
     if (self.distanceCovered >= self.totalDistance) {

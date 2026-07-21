@@ -844,8 +844,8 @@ static const CGFloat kLSMapHeightMultiplier = 0.30;
 - (void)refreshStatusPill {
     LSRouteSimulator *simulator = [LSRouteSimulator shared];
     if (simulator.isSimulating) {
-        double kmh = [LSRouteSimulator speedMetersPerSecondForMode:simulator.transportMode customSpeedKmh:simulator.customSpeedKmh] * 3.6;
-        self.statusLabel.text = [NSString stringWithFormat:@"Simulating · %.1f km/h", kmh];
+        double mph = [LSRouteSimulator speedMetersPerSecondForMode:simulator.transportMode customSpeedMph:simulator.customSpeedMph] * 2.236936;
+        self.statusLabel.text = [NSString stringWithFormat:@"Simulating · %.1f km/h", mph];
         self.statusDot.backgroundColor = UIColor.systemGreenColor;
     } else {
         BOOL active = [[PersistenceManager shared] isSpoofingEnabled];

@@ -98,7 +98,7 @@ CLLocation *LSCreateSpoofedLocation(void) {
     LSRouteSimulator *simulator = [LSRouteSimulator shared];
     if (simulator.isSimulating) {
         LSTransportMode mode = simulator.transportMode;
-        double speed = [LSRouteSimulator speedMetersPerSecondForMode:mode customSpeedKmh:simulator.customSpeedKmh];
+        double speed = [LSRouteSimulator speedMetersPerSecondForMode:mode customSpeedMph:simulator.customSpeedMph];
         double accuracy = [LSRouteSimulator horizontalAccuracyForMode:mode];
         PersistenceManager *store = [PersistenceManager shared];
         return LSBuildSpoofedLocation(simulator.currentCoordinate,

@@ -31,7 +31,8 @@ typedef NS_ENUM(NSInteger, LSTransportMode) {
 
 @property (nonatomic, weak, nullable) id<LSRouteSimulatorDelegate> delegate;
 @property (nonatomic, assign) LSTransportMode transportMode;
-@property (nonatomic, assign) double customSpeedKmh;
+@property (nonatomic, assign) double customSpeedMph;
+@property (nonatomic, readonly) double currentSpeedMetersPerSecond;
 @property (nonatomic, readonly) BOOL isSimulating;
 @property (nonatomic, readonly) BOOL isPaused;
 @property (nonatomic, readonly) CLLocationCoordinate2D currentCoordinate;
@@ -45,7 +46,7 @@ typedef NS_ENUM(NSInteger, LSTransportMode) {
 - (void)resume;
 - (void)stop;
 
-+ (double)speedMetersPerSecondForMode:(LSTransportMode)mode customSpeedKmh:(double)customSpeedKmh;
++ (double)speedMetersPerSecondForMode:(LSTransportMode)mode customSpeedMph:(double)customSpeedMph;
 + (double)horizontalAccuracyForMode:(LSTransportMode)mode;
 
 @end
