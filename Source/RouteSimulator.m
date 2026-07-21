@@ -1,5 +1,6 @@
 #import "RouteSimulator.h"
 #import "VehicleDynamics.h"
+#import "LSSystemWideBridge.h"
 #import <os/lock.h>
 
 @implementation LSRoutePoint
@@ -185,6 +186,7 @@
     [self.tickTimer invalidate];
     self.tickTimer = nil;
     [self.vehicleDynamics stop];
+    [self notifyDelegateUpdate];
 }
 
 - (void)resume {
@@ -195,6 +197,7 @@
     self.vehicleDynamics.targetSpeedMetersPerSecond =
         [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode
                                        customSpeedKmh:self.customSpeedKmh];
+    [self notifyDelegateUpdate];
     [self scheduleTickTimer];
 }
 
@@ -208,6 +211,7 @@
     self.currentSegmentIndex = 0;
     self.totalDistance = 0.0;
     [self.vehicleDynamics stop];
+    LSClearLiveRoute();
 }
 
 - (void)scheduleTickTimer {
@@ -290,6 +294,13 @@
 }
 
 - (void)notifyDelegateUpdate {
+    if (CLLocationCoordinate2DIsValid(self.currentCoordinate) && self.isSimulating) {
+        LSPublishLiveRoute(self.currentCoordinate,
+                           self.currentHeading,
+                           self.currentSpeedMetersPerSecond,
+                           self.isPaused);
+    }
+
     id<LSRouteSimulatorDelegate> delegate = self.delegate;
     if ([delegate respondsToSelector:@selector(routeSimulator:didUpdateCoordinate:heading:)]) {
         [delegate routeSimulator:self didUpdateCoordinate:self.currentCoordinate heading:self.currentHeading];
