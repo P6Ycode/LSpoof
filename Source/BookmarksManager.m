@@ -1,6 +1,8 @@
 #import "BookmarksManager.h"
+#import <notify.h>
 
-static NSString * const kSuiteName = @"com.locationspoofer.dylib";
+static NSString * const kSuiteName = @"com.p6ycode.lspoof.system";
+static const char *kLSPreferencesChangedNotification = "com.p6ycode.lspoof/preferences-changed";
 static NSString * const kBookmarksKey = @"LSBookmarks";
 static NSString * const kBookmarkNameKey = @"LSBMName";
 static NSString * const kBookmarkLatitudeKey = @"LSBMLat";
@@ -72,6 +74,7 @@ static const NSUInteger kLSMaxBookmarks = 50;
 @property (nonatomic, strong) NSUserDefaults *defaults;
 @property (nonatomic, strong) NSMutableArray<LSBookmark *> *bookmarks;
 @property (nonatomic, assign) BOOL loaded;
+@property (nonatomic, assign) int preferencesNotifyToken;
 @end
 
 @implementation BookmarksManager
@@ -90,8 +93,25 @@ static const NSUInteger kLSMaxBookmarks = 50;
     if (self) {
         _defaults = [[NSUserDefaults alloc] initWithSuiteName:kSuiteName];
         _bookmarks = [NSMutableArray array];
+        _preferencesNotifyToken = NOTIFY_TOKEN_INVALID;
+        __weak BookmarksManager *weakSelf = self;
+        notify_register_dispatch(kLSPreferencesChangedNotification,
+                                 &_preferencesNotifyToken,
+                                 dispatch_get_global_queue(QOS_CLASS_UTILITY, 0),
+                                 ^(__unused int token) {
+            [weakSelf invalidateCache];
+        });
     }
     return self;
+}
+
+- (void)invalidateCache {
+    @synchronized(self) {
+        self.defaults = [[NSUserDefaults alloc] initWithSuiteName:kSuiteName];
+        [self.defaults synchronize];
+        [self.bookmarks removeAllObjects];
+        self.loaded = NO;
+    }
 }
 
 - (void)loadIfNeeded {
@@ -119,6 +139,8 @@ static const NSUInteger kLSMaxBookmarks = 50;
         [payload addObject:[bookmark dictionaryRepresentation]];
     }
     [self.defaults setObject:payload forKey:kBookmarksKey];
+    [self.defaults synchronize];
+    notify_post(kLSPreferencesChangedNotification);
 }
 
 - (NSArray<LSBookmark *> *)allBookmarks {
