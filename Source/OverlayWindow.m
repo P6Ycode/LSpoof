@@ -37,7 +37,7 @@ static void LSUpdateThreeFingerHoldForEvent(UIEvent *event);
 static void LSInitializeSendEventTables(void) {
     dispatch_once(&ls_sendEventTablesOnceToken, ^{
         ls_sendEventSwizzledClasses = [NSHashTable weakObjectsHashTable];
-        ls_overlayLog = os_log_create("com.locationspoofer.dylib", "overlay");
+        ls_overlayLog = os_log_create("com.p6ycode.lspoof", "overlay");
     });
 }
 
