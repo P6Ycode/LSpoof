@@ -2,12 +2,16 @@
 #import "LSSpoofProvider.h"
 #import "PersistenceManager.h"
 #import "RouteSimulator.h"
+#import "LSSystemWideBridge.h"
 
 @implementation LSLocationHookAdapter
 + (BOOL)shouldProvideSpoofedLocation {
     PersistenceManager *store = [PersistenceManager shared];
     BOOL requested = [store isSpoofingEnabled] || store.keepLastSpoof;
-    BOOL hasSource = [LSRouteSimulator shared].isSimulating || [store hasStoredCoordinate];
+    LSLiveRouteSnapshot liveRoute = {0};
+    BOOL hasSource = [LSRouteSimulator shared].isSimulating ||
+                     LSReadLiveRoute(&liveRoute) ||
+                     [store hasStoredCoordinate];
     return requested && hasSource;
 }
 + (nullable CLLocation *)currentSpoofedLocation {
