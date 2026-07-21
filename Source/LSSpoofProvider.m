@@ -2,6 +2,7 @@
 #import "LSLocationState.h"
 #import "PersistenceManager.h"
 #import "RouteSimulator.h"
+#import "LSSystemWideBridge.h"
 
 static CLLocationCoordinate2D LSProviderApplyFluctuation(CLLocationCoordinate2D coordinate,
                                                          CLLocationDistance radiusMeters) {
@@ -36,11 +37,17 @@ static CLLocationCoordinate2D LSProviderApplyFluctuation(CLLocationCoordinate2D 
     CLLocationSpeed speed = 0.0;
     CLLocationAccuracy accuracy = 6.0;
 
+    LSLiveRouteSnapshot liveRoute = {0};
     if (simulator.isSimulating) {
         coordinate = simulator.currentCoordinate;
         heading = simulator.currentHeading;
         speed = simulator.currentSpeedMetersPerSecond;
         accuracy = [LSRouteSimulator horizontalAccuracyForMode:simulator.transportMode];
+    } else if (LSReadLiveRoute(&liveRoute)) {
+        coordinate = liveRoute.coordinate;
+        heading = liveRoute.heading;
+        speed = liveRoute.speed;
+        accuracy = 5.0;
     } else if ([store hasStoredCoordinate]) {
         coordinate = [store spoofCoordinate];
         if (store.fluctuationEnabled) {
