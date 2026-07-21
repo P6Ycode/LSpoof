@@ -4,21 +4,23 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LSLocationState : NSObject
-
 @property (class, nonatomic, readonly) LSLocationState *shared;
-
-@property (nonatomic, assign) BOOL spoofingEnabled;
-@property (nonatomic, assign) CLLocationCoordinate2D coordinate;
-@property (nonatomic, assign) CLLocationDirection heading;
-@property (nonatomic, assign) CLLocationSpeed speed;
-@property (nonatomic, assign) CLLocationAccuracy horizontalAccuracy;
-@property (nonatomic, strong) NSDate *timestamp;
-
-- (CLLocation *)currentLocation;
+@property (nonatomic, readonly, getter=isSpoofingEnabled) BOOL spoofingEnabled;
+@property (nonatomic, readonly) CLLocationCoordinate2D coordinate;
+@property (nonatomic, readonly) CLLocationDirection heading;
+@property (nonatomic, readonly) CLLocationSpeed speed;
+@property (nonatomic, readonly) CLLocationDistance altitude;
+@property (nonatomic, readonly) CLLocationAccuracy horizontalAccuracy;
+@property (nonatomic, readonly) CLLocationAccuracy verticalAccuracy;
+@property (nonatomic, strong, readonly) NSDate *timestamp;
+- (nullable CLLocation *)currentLocation;
 - (void)updateCoordinate:(CLLocationCoordinate2D)coordinate
-                heading:(CLLocationDirection)heading
-                 speed:(CLLocationSpeed)speed;
-
+                 heading:(CLLocationDirection)heading
+                   speed:(CLLocationSpeed)speed
+                altitude:(CLLocationDistance)altitude
+      horizontalAccuracy:(CLLocationAccuracy)horizontalAccuracy
+        verticalAccuracy:(CLLocationAccuracy)verticalAccuracy;
+- (void)clear;
 @end
 
 NS_ASSUME_NONNULL_END
