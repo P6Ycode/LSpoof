@@ -457,7 +457,7 @@
 
 - (void)routeSimulator:(LSRouteSimulator *)simulator didUpdateCoordinate:(CLLocationCoordinate2D)coordinate heading:(CLLocationDirection)heading {
     (void)heading;
-    double kmh = [LSRouteSimulator speedMetersPerSecondForMode:simulator.transportMode customSpeedKmh:simulator.customSpeedKmh] * 3.6;
+    double kmh = simulator.currentSpeedMetersPerSecond * 3.6;
     self.statusLabel.text = [NSString stringWithFormat:@"Simulating · %.1f km/h", kmh];
     self.statusDot.backgroundColor = UIColor.systemGreenColor;
 
