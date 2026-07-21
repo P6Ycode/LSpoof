@@ -1,8 +1,10 @@
 #import "PersistenceManager.h"
 #import <os/lock.h>
+#import <notify.h>
 
 // Plaintext NSUserDefaults in the host sandbox; readable by the host process and device backups.
-static NSString * const kSuiteName = @"com.locationspoofer.dylib";
+static NSString * const kSuiteName = @"com.p6ycode.lspoof.system";
+static const char *kLSPreferencesChangedNotification = "com.p6ycode.lspoof/preferences-changed";
 static NSString * const kKeyEnabled = @"spoof_enabled";
 static NSString * const kKeyLatitude = @"spoof_latitude";
 static NSString * const kKeyLongitude = @"spoof_longitude";
@@ -22,6 +24,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
 
 @interface PersistenceManager () {
     os_unfair_lock _lock;
+    int _preferencesNotifyToken;
 }
 @property (nonatomic, strong) NSUserDefaults *defaults;
 @property (nonatomic, assign) BOOL cachedEnabled;
@@ -66,6 +69,14 @@ static const NSUInteger kLSMaxRecentLocations = 5;
         _cachedKeepLastSpoof = NO;
         _cachedShowRealLocation = NO;
         _cachedRecents = [NSMutableArray array];
+        _preferencesNotifyToken = NOTIFY_TOKEN_INVALID;
+        __weak PersistenceManager *weakSelf = self;
+        notify_register_dispatch(kLSPreferencesChangedNotification,
+                                 &_preferencesNotifyToken,
+                                 dispatch_get_global_queue(QOS_CLASS_UTILITY, 0),
+                                 ^(__unused int token) {
+            [weakSelf reloadFromDefaults];
+        });
     }
     return self;
 }
@@ -90,8 +101,17 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.recentsLoaded = YES;
 }
 
+- (void)broadcastChange {
+    [self.defaults synchronize];
+    notify_post(kLSPreferencesChangedNotification);
+}
+
 - (void)reloadFromDefaults {
+    NSUserDefaults *freshDefaults = [[NSUserDefaults alloc] initWithSuiteName:kSuiteName];
+    [freshDefaults synchronize];
+
     os_unfair_lock_lock(&_lock);
+    self.defaults = freshDefaults;
     self.cachedEnabled = [self.defaults boolForKey:kKeyEnabled];
     self.cachedSimulationWasActive = [self.defaults boolForKey:kKeySimulationWasActive];
     self.cachedAltitude = [self.defaults doubleForKey:kKeyAltitude];
@@ -168,6 +188,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedSimulationWasActive = simulationWasActive;
     [self.defaults setBool:simulationWasActive forKey:kKeySimulationWasActive];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (double)altitude {
@@ -182,6 +203,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedAltitude = altitude;
     [self.defaults setDouble:altitude forKey:kKeyAltitude];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (CLLocationDirection)heading {
@@ -196,6 +218,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedHeading = heading;
     [self.defaults setDouble:heading forKey:kKeyHeading];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (BOOL)fluctuationEnabled {
@@ -210,6 +233,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedFluctuationEnabled = fluctuationEnabled;
     [self.defaults setBool:fluctuationEnabled forKey:kKeyFluctuationEnabled];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (double)fluctuationRadius {
@@ -224,6 +248,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedFluctuationRadius = fluctuationRadius > 0.0 ? fluctuationRadius : 50.0;
     [self.defaults setDouble:self.cachedFluctuationRadius forKey:kKeyFluctuationRadius];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (BOOL)keepLastSpoof {
@@ -238,6 +263,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedKeepLastSpoof = keepLastSpoof;
     [self.defaults setBool:keepLastSpoof forKey:kKeyKeepLastSpoof];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (BOOL)showRealLocation {
@@ -252,6 +278,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     self.cachedShowRealLocation = showRealLocation;
     [self.defaults setBool:showRealLocation forKey:kKeyShowRealLocation];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (NSArray<NSDictionary *> *)recentLocations {
@@ -285,6 +312,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
         }
         [self.defaults setObject:[self.cachedRecents copy] forKey:kKeyRecentLocations];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (BOOL)setSpoofCoordinate:(CLLocationCoordinate2D)coordinate enabled:(BOOL)enabled {
@@ -305,6 +333,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     [self.defaults setBool:self.cachedFluctuationEnabled forKey:kKeyFluctuationEnabled];
     [self.defaults setDouble:self.cachedFluctuationRadius forKey:kKeyFluctuationRadius];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
     return YES;
 }
 
@@ -323,6 +352,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     [self.defaults removeObjectForKey:kKeyEnabled];
     [self.defaults setBool:NO forKey:kKeySimulationWasActive];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 - (void)clearLastSpoof {
@@ -339,6 +369,7 @@ static const NSUInteger kLSMaxRecentLocations = 5;
     [self.defaults setBool:NO forKey:kKeySimulationWasActive];
     [self.defaults setBool:NO forKey:kKeyKeepLastSpoof];
     os_unfair_lock_unlock(&_lock);
+    [self broadcastChange];
 }
 
 @end
