@@ -10,6 +10,7 @@ LocationSpoofer_FILES = \
 	Source/LSHooking.m \
 	Source/LocationSpoofer.m \
 	Source/RouteSimulator.m \
+	Source/VehicleDynamics.m \
 	Source/BookmarksManager.m \
 	Source/OverlayWindow.m \
 	Source/MapPickerViewController.m \
