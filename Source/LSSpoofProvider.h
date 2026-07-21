@@ -4,11 +4,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface LSSpoofProvider : NSObject
-
 @property (class, nonatomic, readonly) LSSpoofProvider *shared;
-
-- (CLLocation *)currentLocation;
-
+- (nullable CLLocation *)currentLocation;
+- (void)clear;
 @end
 
 NS_ASSUME_NONNULL_END
