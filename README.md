@@ -1,75 +1,42 @@
 # LSpoof
 
-Override your iOS device's GPS location from inside any app — no jailbreak required.
+LSpoof is a system-wide location simulation tweak for rootless jailbreaks. It injects into UIKit application processes so Apple and third-party apps read the same selected or simulated location.
 
-Drop this dylib into a sideloaded IPA, and the app will report whatever coordinates you choose instead of your real location. Safari, Maps, Uber, Lyft, Pokemon GO — wherever the host app reads `CLLocation`, the spoofed value comes through.
+## Features
 
----
+- Three-finger, 0.8-second gesture opens the map picker from any injected app
+- Static teleport with altitude, heading, fluctuation, recents, and bookmarks
+- Walking, cycling, driving, and custom-speed route simulation
+- Realistic acceleration and braking
+- Pause reports 0 m/s, like stopping at a red light
+- Shared preferences update running apps after location changes
+- Live route coordinate, heading, speed, and pause state are shared across processes
+- Safe fallback to the real location when no valid spoof source exists
 
-## How It Works
+## Requirements
 
-The library is injected into a third-party iOS app via `LC_LOAD_DYLIB` (load-time Mach-O patching). On launch, it swizzles `CLLocationManager` methods so every location callback — delegate-based or synchronous — returns a user-defined coordinate instead of the real GPS reading.
-
-Supported hooking targets:
-
-- `CLLocationManager.setDelegate:` → delegates implementing `locationManager:didUpdateLocations:` or the legacy `locationManager:didUpdateToLocation:fromLocation:` are swizzled to inject spoofed `CLLocation` arrays.
-- `CLLocationManager.location` — the synchronous getter is swizzled directly.
-
-The gesture detection (`sendEvent:` on `UIApplication`/`UIWindow`) is reinstalled on `UIApplicationDidFinishLaunching` and `UIApplicationDidBecomeActive` to handle apps that subclass `UIApplication`.
-
-**What is NOT hooked:** Swift `CLLocationUpdate.liveUpdates()` (iOS 17+ async sequence), `CLBackgroundActivitySession`, telephony/WiFi/IP-based geolocation, or server-side IP checks.
-
----
-
-## Trigger
-
-**Three fingers, 0.8 seconds.** Touch and hold three fingers anywhere on the screen. After 0.8 seconds the map picker appears. Lift any finger before the timer fires and nothing happens.
-
-The gesture is disabled while the picker is visible so the host app's MapKit still works normally.
-
----
-
-## The Picker
-
-A full-sheet map UI with search, a draggable pin, and a control panel.
-
-### Map tab
-
-Two modes switchable via a segment control:
-
-**Static mode** — pick a coordinate and hold it:
-- Search bar with Apple MapKit autocomplete
-- Interactive map with draggable pin
-- Manual Lat/Lon/Altitude text fields
-- Heading slider (0–359 degrees with compass direction indicator)
-- **Apply Location** — persists the coordinate and enables spoofing
-- **Stop Spoofing** — disables spoofing and clears saved state
-
-**Route mode** — simulate movement along a real route:
-- Tap to place start and destination markers (green/red draggable pins)
-- **Get Route** fetches directions via Apple Maps
-- Transport mode: Walk (5 km/h), Cycle (15 km/h), Drive (50 km/h), or Custom
-- **Play** / **Pause** / **Stop** controls the simulation
-- Interpolates along the polyline at 0.1 s intervals with heading computed in real time
-
-### Bookmarks tab
-
-Two sections:
-- **Recents** — last 5 applied coordinates with reverse-geocoded names
-- **Bookmarks** — saved locations; swipe to delete, long-press to rename, drag to reorder in edit mode
-- Each bookmark has an inline **Apply** button for one-tap spoofing
-
----
+- A rootless jailbreak with a Substrate-compatible tweak loader
+- iOS 16 or later
+- Theos with an iOS SDK
+- A current macOS/Xcode toolchain when building the arm64e slice
 
 ## Build
 
-```
+```sh
 export THEOS=/path/to/theos
-make clean
-make
+make clean package
 ```
 
-Output: `.theos/obj/debug/LocationSpoofer.dylib`
+The rootless package scheme produces an `iphoneos-arm64` Debian package and installs files under the jailbreak prefix, normally `/var/jb`.
 
-Requires [theos](https://github.com/theos/theos) (Linux Makefile toolchain). SDK target is iPhoneOS 16.0, source-compatible through iOS 26. Architecture: `arm64`. ARC enabled.
+## Install
 
+```sh
+make install
+```
+
+Installation runs `sbreload`. Open any regular app, then hold three fingers for 0.8 seconds to open LSpoof.
+
+## Injection scope
+
+`LSpoof.plist` filters on `UIApplication`, covering normal UIKit apps including Find My when tweak injection is enabled for that process. LSpoof does not hook `locationd`, alter GNSS hardware data, spoof IP/Wi-Fi/cellular positioning, or bypass an app's server-side location checks.
