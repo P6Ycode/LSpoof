@@ -12,6 +12,7 @@ LocationSpoofer_FILES = \
 	Source/LSLocationState.m \
 	Source/LSLocationBridge.m \
 	Source/LSSpoofProvider.m \
+	Source/LSLocationHookAdapter.m \
 	Source/RouteSimulator.m \
 	Source/BookmarksManager.m \
 	Source/OverlayWindow.m \
