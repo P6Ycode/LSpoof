@@ -37,6 +37,7 @@ typedef NS_ENUM(NSInteger, LSTransportMode) {
 @property (nonatomic, readonly) CLLocationCoordinate2D currentCoordinate;
 @property (nonatomic, readonly) CLLocationDirection currentHeading;
 @property (nonatomic, readonly) CLLocationSpeed currentSpeedMetersPerSecond;
+@property (nonatomic, readonly) CLLocationSpeed currentSpeedMetersPerSecond;
 @property (nonatomic, readonly, nullable) NSArray<LSRoutePoint *> *routePoints;
 @property (nonatomic, readonly) CLLocationCoordinate2D startCoordinate;
 @property (nonatomic, readonly) CLLocationCoordinate2D destinationCoordinate;
