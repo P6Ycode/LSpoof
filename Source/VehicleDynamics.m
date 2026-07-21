@@ -1,10 +1,14 @@
 #import "VehicleDynamics.h"
+#import <math.h>
 
 @interface LSVehicleDynamics ()
 @property (nonatomic, assign, readwrite) double currentSpeedMetersPerSecond;
 @end
 
 @implementation LSVehicleDynamics
+
+@synthesize targetSpeedMetersPerSecond = _targetSpeedMetersPerSecond;
+@synthesize currentSpeedMetersPerSecond = _currentSpeedMetersPerSecond;
 
 - (instancetype)init {
     self = [super init];
