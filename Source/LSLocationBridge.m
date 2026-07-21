@@ -1,6 +1,10 @@
 #import "LSLocationBridge.h"
-#import "LSLocationState.h"
+#import "LSSpoofProvider.h"
 
 CLLocation *LSGetCurrentSpoofedLocation(void) {
-    return [[LSLocationState shared] currentLocation];
+    return [[LSSpoofProvider shared] currentLocation];
+}
+
+void LSClearCurrentSpoofedLocation(void) {
+    [[LSSpoofProvider shared] clear];
 }
