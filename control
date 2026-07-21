@@ -1,0 +1,9 @@
+Package: com.p6ycode.lspoof
+Name: LSpoof
+Version: 0.1.0
+Architecture: iphoneos-arm64
+Description: System-wide location simulation for rootless jailbreaks.
+Maintainer: P6Ycode
+Author: P6Ycode
+Section: Tweaks
+Depends: firmware (>= 16.0), mobilesubstrate
