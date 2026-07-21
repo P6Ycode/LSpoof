@@ -39,9 +39,7 @@ static CLLocationCoordinate2D LSProviderApplyFluctuation(CLLocationCoordinate2D 
     if (simulator.isSimulating) {
         coordinate = simulator.currentCoordinate;
         heading = simulator.currentHeading;
-        speed = simulator.isPaused ? 0.0 :
-            [LSRouteSimulator speedMetersPerSecondForMode:simulator.transportMode
-                                           customSpeedKmh:simulator.customSpeedKmh];
+        speed = simulator.currentSpeedMetersPerSecond;
         accuracy = [LSRouteSimulator horizontalAccuracyForMode:simulator.transportMode];
     } else if ([store hasStoredCoordinate]) {
         coordinate = [store spoofCoordinate];
