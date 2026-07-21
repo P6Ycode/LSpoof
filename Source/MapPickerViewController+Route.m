@@ -1,6 +1,7 @@
 #import "MapPickerViewController+Private.h"
 #import "PersistenceManager.h"
 #import "RouteSimulator.h"
+#import "LSSystemWideBridge.h"
 
 @implementation LSStartAnnotation
 @end
@@ -384,6 +385,18 @@
     }
 
     if (![PersistenceManager shared].simulationWasActive) {
+        return;
+    }
+
+    LSLiveRouteSnapshot liveRoute = {0};
+    if (LSReadLiveRoute(&liveRoute)) {
+        self.selectedCoordinate = liveRoute.coordinate;
+        self.statusLabel.text = liveRoute.paused
+            ? @"Route paused in another app"
+            : @"Route running in another app";
+        self.statusDot.backgroundColor = liveRoute.paused
+            ? UIColor.systemOrangeColor
+            : UIColor.systemGreenColor;
         return;
     }
 
