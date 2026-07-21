@@ -9,6 +9,7 @@ LocationSpoofer_FILES = \
 	Source/dylib_init.m \
 	Source/LSHooking.m \
 	Source/LocationSpoofer.m \
+	Source/LSLocationState.m \
 	Source/RouteSimulator.m \
 	Source/BookmarksManager.m \
 	Source/OverlayWindow.m \
