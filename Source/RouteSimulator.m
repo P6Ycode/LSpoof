@@ -1,5 +1,6 @@
 #import "RouteSimulator.h"
 #import "VehicleDynamics.h"
+#import "VehicleDynamics.h"
 #import <os/lock.h>
 
 @implementation LSRoutePoint
@@ -17,6 +18,7 @@
 @property (nonatomic, assign) NSUInteger currentSegmentIndex;
 @property (nonatomic, assign) BOOL isSimulating;
 @property (nonatomic, assign) BOOL isPaused;
+@property (nonatomic, strong) LSVehicleDynamics *vehicleDynamics;
 @property (nonatomic, strong) LSVehicleDynamics *vehicleDynamics;
 @end
 
@@ -42,6 +44,7 @@
         _customSpeedKmh = 30.0;
         _currentCoordinate = kCLLocationCoordinate2DInvalid;
         _currentHeading = 0.0;
+        _vehicleDynamics = [[LSVehicleDynamics alloc] init];
         _vehicleDynamics = [[LSVehicleDynamics alloc] init];
     }
     return self;
@@ -71,6 +74,10 @@
     os_unfair_lock_lock(&_coordLock);
     _currentHeading = heading;
     os_unfair_lock_unlock(&_coordLock);
+}
+
+- (CLLocationSpeed)currentSpeedMetersPerSecond {
+    return self.vehicleDynamics.currentSpeedMetersPerSecond;
 }
 
 - (CLLocationSpeed)currentSpeedMetersPerSecond {
@@ -184,6 +191,7 @@
     self.isPaused = YES;
     [self.tickTimer invalidate];
     self.tickTimer = nil;
+    [self.vehicleDynamics stop];
     [self.vehicleDynamics stop];
 }
 
