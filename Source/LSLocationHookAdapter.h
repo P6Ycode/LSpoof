@@ -2,12 +2,8 @@
 #import <CoreLocation/CoreLocation.h>
 
 NS_ASSUME_NONNULL_BEGIN
-
 @interface LSLocationHookAdapter : NSObject
-
-+ (CLLocation *)currentSpoofedLocation;
++ (nullable CLLocation *)currentSpoofedLocation;
 + (BOOL)shouldProvideSpoofedLocation;
-
 @end
-
 NS_ASSUME_NONNULL_END
