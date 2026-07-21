@@ -1,4 +1,5 @@
 #import "RouteSimulator.h"
+#import "VehicleDynamics.h"
 #import <os/lock.h>
 
 @implementation LSRoutePoint
@@ -16,6 +17,7 @@
 @property (nonatomic, assign) NSUInteger currentSegmentIndex;
 @property (nonatomic, assign) BOOL isSimulating;
 @property (nonatomic, assign) BOOL isPaused;
+@property (nonatomic, strong) LSVehicleDynamics *vehicleDynamics;
 @end
 
 @implementation LSRouteSimulator
@@ -40,6 +42,7 @@
         _customSpeedKmh = 30.0;
         _currentCoordinate = kCLLocationCoordinate2DInvalid;
         _currentHeading = 0.0;
+        _vehicleDynamics = [[LSVehicleDynamics alloc] init];
     }
     return self;
 }
@@ -68,6 +71,10 @@
     os_unfair_lock_lock(&_coordLock);
     _currentHeading = heading;
     os_unfair_lock_unlock(&_coordLock);
+}
+
+- (CLLocationSpeed)currentSpeedMetersPerSecond {
+    return self.vehicleDynamics.currentSpeedMetersPerSecond;
 }
 
 - (CLLocationCoordinate2D)startCoordinate {
@@ -159,6 +166,10 @@
     }
     self.isSimulating = YES;
     self.isPaused = NO;
+    [self.vehicleDynamics stop];
+    self.vehicleDynamics.targetSpeedMetersPerSecond =
+        [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode
+                                       customSpeedKmh:self.customSpeedKmh];
 
     free(rawCoordinates);
 
@@ -173,6 +184,7 @@
     self.isPaused = YES;
     [self.tickTimer invalidate];
     self.tickTimer = nil;
+    [self.vehicleDynamics stop];
 }
 
 - (void)resume {
@@ -180,6 +192,9 @@
         return;
     }
     self.isPaused = NO;
+    self.vehicleDynamics.targetSpeedMetersPerSecond =
+        [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode
+                                       customSpeedKmh:self.customSpeedKmh];
     [self scheduleTickTimer];
 }
 
@@ -192,6 +207,7 @@
     self.routePoints = nil;
     self.currentSegmentIndex = 0;
     self.totalDistance = 0.0;
+    [self.vehicleDynamics stop];
 }
 
 - (void)scheduleTickTimer {
@@ -209,8 +225,10 @@
         return;
     }
 
-    double speed = [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode
-                                                  customSpeedKmh:self.customSpeedKmh];
+    self.vehicleDynamics.targetSpeedMetersPerSecond =
+        [LSRouteSimulator speedMetersPerSecondForMode:self.transportMode
+                                       customSpeedKmh:self.customSpeedKmh];
+    double speed = [self.vehicleDynamics advanceWithDeltaTime:0.1];
     self.distanceCovered += speed * 0.1;
 
     if (self.distanceCovered >= self.totalDistance) {
