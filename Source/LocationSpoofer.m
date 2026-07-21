@@ -311,7 +311,7 @@ static void LSInstallCLLocationManagerHooks(void) {
 + (void)installHooks {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        ls_log = os_log_create("com.locationspoofer.dylib", "hooks");
+        ls_log = os_log_create("com.p6ycode.lspoof", "hooks");
         LSInitializeDelegateHookSelectors();
         LSInstallCLLocationManagerHooks();
         LSInstallMKUserLocationHooks();
